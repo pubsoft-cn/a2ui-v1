@@ -85,8 +85,9 @@ async function captureScreenshots(): Promise<void> {
 
     await page.goto(fileUrl, { waitUntil: 'networkidle' });
 
-    // Wait a bit for fonts and rendering to settle
-    await page.waitForTimeout(500);
+    // Wait for fonts to fully load and rendering to settle
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(1000);
 
     await page.screenshot({
       path: outputPath,
