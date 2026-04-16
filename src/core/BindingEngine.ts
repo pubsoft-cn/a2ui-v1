@@ -14,7 +14,10 @@ import type {
   StyleProps,
 } from '../types';
 
-/** Regex to match binding expressions: {{expression}} */
+/**
+ * Regex to match binding expressions: {{expression}}.
+ * Uses negated character class [^{}]+ which prevents catastrophic backtracking (ReDoS-safe).
+ */
 const BINDING_REGEX = /\{\{([^{}]+)\}\}/g;
 
 export class BindingEngine {
