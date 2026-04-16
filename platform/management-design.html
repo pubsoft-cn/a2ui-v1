@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A2UI Schema 管理平台 - 设计界面</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
+
+/* ─── Top Nav ─── */
+.top-nav { display: flex; align-items: center; height: 56px; background: #1a1a2e; color: #fff; padding: 0 20px; }
+.top-nav .logo { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+.top-nav .nav-tabs { display: flex; margin-left: 40px; gap: 4px; }
+.top-nav .nav-tab { padding: 8px 18px; border-radius: 6px 6px 0 0; font-size: 13px; color: #a0a0c0; cursor: pointer; transition: all .2s; }
+.top-nav .nav-tab.active { background: rgba(255,255,255,.12); color: #fff; }
+.top-nav .nav-tab:hover { color: #fff; }
+.top-nav .user-info { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #a0a0c0; }
+.top-nav .avatar { width: 30px; height: 30px; border-radius: 50%; background: #6c63ff; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; }
+
+/* ─── Main Layout ─── */
+.main { display: flex; height: calc(100vh - 56px); }
+
+/* ─── Left Sidebar ─── */
+.sidebar-left { width: 260px; background: #fff; border-right: 1px solid #e8e8e8; display: flex; flex-direction: column; }
+.sidebar-header { padding: 14px 16px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; background: #fafbfc; }
+.sidebar-header .icon { font-size: 16px; }
+.component-search { margin: 10px 12px; padding: 8px 12px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 13px; width: calc(100% - 24px); outline: none; }
+.component-search:focus { border-color: #6c63ff; box-shadow: 0 0 0 2px rgba(108,99,255,.1); }
+.component-list { flex: 1; overflow-y: auto; padding: 8px 12px; }
+.component-category { margin-bottom: 12px; }
+.category-title { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; padding-left: 4px; }
+.component-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 4px; cursor: grab; font-size: 13px; transition: all .15s; background: #fff; }
+.component-item:hover { border-color: #6c63ff; background: #f8f7ff; }
+.component-item .comp-icon { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.comp-icon.view-icon { background: #e3f2fd; color: #1565c0; }
+.comp-icon.text-icon { background: #f3e5f5; color: #7b1fa2; }
+.comp-icon.image-icon { background: #e8f5e9; color: #2e7d32; }
+.comp-icon.button-icon { background: #fff3e0; color: #e65100; }
+.comp-icon.input-icon { background: #fce4ec; color: #c62828; }
+.comp-icon.list-icon { background: #e0f7fa; color: #00695c; }
+.comp-icon.scroll-icon { background: #f1f8e9; color: #33691e; }
+.comp-icon.swiper-icon { background: #ede7f6; color: #4527a0; }
+.comp-icon.form-icon { background: #fff8e1; color: #f57f17; }
+
+/* ─── Canvas Area ─── */
+.canvas-area { flex: 1; display: flex; flex-direction: column; background: #e8ecf1; overflow: hidden; }
+.canvas-toolbar { height: 42px; background: #fff; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; padding: 0 16px; gap: 8px; }
+.toolbar-btn { padding: 5px 14px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.toolbar-btn:hover { border-color: #6c63ff; color: #6c63ff; }
+.toolbar-btn.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+.toolbar-sep { width: 1px; height: 20px; background: #e0e0e0; margin: 0 4px; }
+.canvas-info { margin-left: auto; font-size: 11px; color: #999; }
+.canvas-viewport { flex: 1; padding: 30px; overflow: auto; display: flex; justify-content: center; align-items: flex-start; background: repeating-conic-gradient(#dce0e5 0% 25%, transparent 0% 50%) 50% / 20px 20px; }
+
+/* ─── Schema Tree on Canvas ─── */
+.schema-canvas { width: 375px; min-height: 667px; background: #fff; border-radius: 8px; box-shadow: 0 2px 20px rgba(0,0,0,.1); overflow: hidden; }
+.canvas-nav { height: 44px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; border-bottom: 1px solid #f0f0f0; }
+.canvas-content { padding: 0; }
+.tree-node { border: 2px dashed transparent; margin: 4px 6px; padding: 6px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all .15s; position: relative; }
+.tree-node:hover { border-color: #6c63ff; }
+.tree-node.selected { border-color: #6c63ff; background: rgba(108,99,255,.05); }
+.tree-node .node-label { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #888; }
+.tree-node .node-label .tag { padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+.tree-node .tag.view { background: #e3f2fd; color: #1565c0; }
+.tree-node .tag.text { background: #f3e5f5; color: #7b1fa2; }
+.tree-node .tag.image { background: #e8f5e9; color: #2e7d32; }
+.tree-node .tag.button { background: #fff3e0; color: #e65100; }
+.tree-node .tag.input { background: #fce4ec; color: #c62828; }
+.tree-node .tag.scroll-view { background: #f1f8e9; color: #33691e; }
+.tree-node .tag.form { background: #fff8e1; color: #f57f17; }
+.tree-node .node-content { margin-top: 4px; }
+/* Preview inside canvas */
+.preview-text { font-size: 14px; color: #333; padding: 4px 0; }
+.preview-image { width: 100%; height: 160px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 13px; }
+.preview-button { display: inline-block; padding: 8px 24px; background: #6c63ff; color: #fff; border-radius: 6px; font-size: 13px; text-align: center; }
+.preview-input { width: 100%; padding: 8px 12px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 13px; background: #fafafa; color: #aaa; }
+.tree-node .children { margin-left: 12px; border-left: 1px solid #e8e8e8; padding-left: 8px; }
+
+/* ─── Right Sidebar ─── */
+.sidebar-right { width: 320px; background: #fff; border-left: 1px solid #e8e8e8; display: flex; flex-direction: column; }
+.panel-tabs { display: flex; border-bottom: 1px solid #f0f0f0; background: #fafbfc; }
+.panel-tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; }
+.panel-tab.active { color: #6c63ff; border-bottom-color: #6c63ff; font-weight: 600; }
+.panel-content { flex: 1; overflow-y: auto; padding: 16px; }
+.prop-group { margin-bottom: 16px; }
+.prop-group-title { font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.prop-row { margin-bottom: 10px; }
+.prop-label { font-size: 11px; color: #999; margin-bottom: 4px; display: block; }
+.prop-input { width: 100%; padding: 7px 10px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 12px; background: #fafafa; outline: none; }
+.prop-input:focus { border-color: #6c63ff; background: #fff; }
+.prop-select { width: 100%; padding: 7px 10px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 12px; background: #fafafa; }
+.prop-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+.badge-draft { background: #fff3e0; color: #e65100; }
+.badge-binding { background: #e8f5e9; color: #2e7d32; }
+
+/* ─── Data Sources Panel ─── */
+.ds-item { padding: 10px 12px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 8px; }
+.ds-header { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; }
+.ds-method { padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; color: #fff; }
+.ds-method.get { background: #4caf50; }
+.ds-method.post { background: #ff9800; }
+.ds-url { color: #1565c0; font-family: 'SF Mono', monospace; }
+.ds-meta { font-size: 11px; color: #999; margin-top: 4px; }
+
+/* ─── Status Bar ─── */
+.status-bar { height: 28px; background: #fafbfc; border-top: 1px solid #e0e0e0; display: flex; align-items: center; padding: 0 16px; font-size: 11px; color: #999; gap: 20px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+.status-dot.green { background: #4caf50; }
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<div class="top-nav">
+  <div class="logo">A2UI Schema 管理平台</div>
+  <div class="nav-tabs">
+    <div class="nav-tab active">🎨 设计</div>
+    <div class="nav-tab">👁 预览</div>
+    <div class="nav-tab">🧪 测试</div>
+    <div class="nav-tab">🔗 绑定</div>
+    <div class="nav-tab">🚀 发布</div>
+  </div>
+  <div class="user-info">
+    <span>商品详情页 v1.2</span>
+    <span class="prop-badge badge-draft">Draft</span>
+    <div class="avatar">A</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Left: Component Palette -->
+  <div class="sidebar-left">
+    <div class="sidebar-header"><span class="icon">📦</span> 组件面板</div>
+    <input class="component-search" placeholder="搜索组件..." value="">
+    <div class="component-list">
+      <div class="component-category">
+        <div class="category-title">布局容器</div>
+        <div class="component-item"><div class="comp-icon view-icon">☐</div><span>view 容器</span></div>
+        <div class="component-item"><div class="comp-icon scroll-icon">↕</div><span>scroll-view 滚动</span></div>
+        <div class="component-item"><div class="comp-icon swiper-icon">⟳</div><span>swiper 轮播</span></div>
+        <div class="component-item"><div class="comp-icon form-icon">📋</div><span>form 表单</span></div>
+      </div>
+      <div class="component-category">
+        <div class="category-title">基础组件</div>
+        <div class="component-item"><div class="comp-icon text-icon">T</div><span>text 文本</span></div>
+        <div class="component-item"><div class="comp-icon image-icon">🖼</div><span>image 图片</span></div>
+        <div class="component-item"><div class="comp-icon button-icon">⊡</div><span>button 按钮</span></div>
+        <div class="component-item"><div class="comp-icon input-icon">⌨</div><span>input 输入框</span></div>
+        <div class="component-item"><div class="comp-icon list-icon">≡</div><span>list 列表</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center: Canvas -->
+  <div class="canvas-area">
+    <div class="canvas-toolbar">
+      <div class="toolbar-btn">↩ 撤销</div>
+      <div class="toolbar-btn">↪ 重做</div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-btn active">📱 手机</div>
+      <div class="toolbar-btn">💻 桌面</div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-btn">🔍 100%</div>
+      <div class="toolbar-btn">⊞ 网格</div>
+      <div class="canvas-info">画布: 375×667 · 节点: 8 · 绑定: 5</div>
+    </div>
+    <div class="canvas-viewport">
+      <div class="schema-canvas">
+        <div class="canvas-nav">商品详情</div>
+        <div class="canvas-content">
+          <!-- Root scroll-view -->
+          <div class="tree-node selected">
+            <div class="node-label"><span class="tag scroll-view">scroll-view</span> #root <span style="color:#6c63ff;font-size:10px;">● 选中</span></div>
+            <div class="children">
+              <!-- Header Image -->
+              <div class="tree-node">
+                <div class="node-label"><span class="tag image">image</span> #header-image</div>
+                <div class="node-content">
+                  <div class="preview-image">🖼 {{detail.image}}</div>
+                </div>
+              </div>
+              <!-- Title -->
+              <div class="tree-node">
+                <div class="node-label"><span class="tag text">text</span> #title</div>
+                <div class="node-content">
+                  <div class="preview-text" style="font-size:18px;font-weight:bold;padding:12px 16px;">{{detail.title}}</div>
+                </div>
+              </div>
+              <!-- Price row -->
+              <div class="tree-node">
+                <div class="node-label"><span class="tag view">view</span> #price-row</div>
+                <div class="node-content" style="display:flex;align-items:baseline;gap:8px;padding:4px 16px;">
+                  <span style="color:#e53935;font-size:22px;font-weight:bold;">¥{{detail.price}}</span>
+                  <span style="color:#999;font-size:12px;text-decoration:line-through;">¥{{detail.originalPrice}}</span>
+                  <span style="background:#fff3e0;color:#e65100;padding:1px 6px;border-radius:3px;font-size:10px;">限时优惠</span>
+                </div>
+              </div>
+              <!-- Description -->
+              <div class="tree-node">
+                <div class="node-label"><span class="tag text">text</span> #desc</div>
+                <div class="node-content">
+                  <div class="preview-text" style="padding:8px 16px;color:#666;font-size:13px;">{{detail.description}}</div>
+                </div>
+              </div>
+              <!-- Spec selector -->
+              <div class="tree-node">
+                <div class="node-label"><span class="tag view">view</span> #spec-selector <span style="color:#2e7d32;font-size:10px;">▸ condition</span></div>
+                <div class="node-content" style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;">
+                  <span style="font-size:13px;color:#666;">选择 <b>颜色 · 尺码</b></span>
+                  <span style="color:#ccc;">›</span>
+                </div>
+              </div>
+              <!-- Buy button -->
+              <div class="tree-node">
+                <div class="node-label"><span class="tag button">button</span> #buy-btn <span style="color:#e65100;font-size:10px;">▸ event:tap</span></div>
+                <div class="node-content" style="padding:12px 16px;">
+                  <div class="preview-button" style="width:100%;text-align:center;padding:12px;">立即购买</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Properties -->
+  <div class="sidebar-right">
+    <div class="panel-tabs">
+      <div class="panel-tab active">属性</div>
+      <div class="panel-tab">样式</div>
+      <div class="panel-tab">事件</div>
+      <div class="panel-tab">数据源</div>
+    </div>
+    <div class="panel-content">
+      <!-- Node info -->
+      <div class="prop-group">
+        <div class="prop-group-title">📌 节点信息</div>
+        <div class="prop-row">
+          <span class="prop-label">ID</span>
+          <input class="prop-input" value="root" readonly>
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">类型</span>
+          <select class="prop-select">
+            <option selected>scroll-view</option>
+            <option>view</option>
+            <option>text</option>
+            <option>image</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Props -->
+      <div class="prop-group">
+        <div class="prop-group-title">⚙️ 组件属性</div>
+        <div class="prop-row">
+          <span class="prop-label">scrollY</span>
+          <select class="prop-select"><option selected>true</option><option>false</option></select>
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">scrollX</span>
+          <select class="prop-select"><option>true</option><option selected>false</option></select>
+        </div>
+      </div>
+
+      <!-- Bindings -->
+      <div class="prop-group">
+        <div class="prop-group-title">🔗 数据绑定</div>
+        <div class="prop-row">
+          <span class="prop-label">条件渲染 (condition)</span>
+          <input class="prop-input" value="" placeholder="如: {{user.isVIP}}">
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">列表循环 (repeat)</span>
+          <input class="prop-input" value="" placeholder="如: {{items}}">
+        </div>
+      </div>
+
+      <!-- Style -->
+      <div class="prop-group">
+        <div class="prop-group-title">🎨 样式</div>
+        <div class="prop-row">
+          <span class="prop-label">flex</span>
+          <input class="prop-input" value="1">
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">背景色</span>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input class="prop-input" value="#ffffff" style="flex:1">
+            <div style="width:28px;height:28px;border-radius:4px;background:#fff;border:1px solid #e0e0e0;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Sources -->
+      <div class="prop-group">
+        <div class="prop-group-title">📊 数据源</div>
+        <div class="ds-item">
+          <div class="ds-header">
+            <span class="ds-method get">GET</span>
+            <span class="ds-url">/api/product/detail</span>
+          </div>
+          <div class="ds-meta">key: detail · cacheTTL: 60s</div>
+        </div>
+        <div class="ds-item">
+          <div class="ds-header">
+            <span class="ds-method get">GET</span>
+            <span class="ds-url">/api/product/recommend</span>
+          </div>
+          <div class="ds-meta">key: recommend · autoRefresh: true</div>
+        </div>
+        <div class="ds-item">
+          <div class="ds-header">
+            <span class="ds-method post">POST</span>
+            <span class="ds-url">/api/cart/add</span>
+          </div>
+          <div class="ds-meta">key: addToCart · event: tap</div>
+        </div>
+      </div>
+
+      <!-- Schema JSON -->
+      <div class="prop-group">
+        <div class="prop-group-title">📄 Schema JSON</div>
+        <div style="background:#1e1e2e;color:#a9dc76;border-radius:6px;padding:12px;font-family:'SF Mono',monospace;font-size:11px;line-height:1.6;max-height:200px;overflow-y:auto;">
+<span style="color:#78dce8;">{</span>
+  <span style="color:#ff6188;">"version"</span>: <span style="color:#ffd866;">"v1.2-abc123"</span>,
+  <span style="color:#ff6188;">"meta"</span>: <span style="color:#78dce8;">{</span>
+    <span style="color:#ff6188;">"title"</span>: <span style="color:#ffd866;">"商品详情"</span>
+  <span style="color:#78dce8;">}</span>,
+  <span style="color:#ff6188;">"root"</span>: <span style="color:#78dce8;">{</span>
+    <span style="color:#ff6188;">"id"</span>: <span style="color:#ffd866;">"root"</span>,
+    <span style="color:#ff6188;">"type"</span>: <span style="color:#ffd866;">"scroll-view"</span>,
+    <span style="color:#ff6188;">"children"</span>: <span style="color:#ab9df2;">[...]</span>
+  <span style="color:#78dce8;">}</span>
+<span style="color:#78dce8;">}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <span><span class="status-dot green"></span> 就绪</span>
+  <span>状态: 设计中 (Draft)</span>
+  <span>节点: 8</span>
+  <span>数据绑定: 5 个表达式</span>
+  <span>数据源: 3 个接口</span>
+  <span>版本: v1.2-abc123</span>
+  <span style="margin-left:auto;">A2UI Schema Designer v1.0</span>
+</div>
+
+</body>
+</html>

@@ -222,21 +222,38 @@ const diagrams = diagramGen.generateAll(schema);
 // diagrams[3] => miniprogram-operation (小程序操作)
 ```
 
-### Test UI Diagrams
+### Platform UI & Runtime Screenshots
 
-Generated SVG diagrams are available in `docs/diagrams/`:
+The management platform includes 4 fully implemented HTML/CSS/JS pages in `platform/`, with runtime screenshots captured via Playwright in `docs/screenshots/`:
 
-| Diagram | File | Description |
-|---------|------|-------------|
-| 管理平台 - 设计界面 | `management-design.svg` | Schema designer with component palette, canvas, and property panel |
-| 管理平台 - 预览界面 | `management-preview.svg` | Preview with mobile device mockup and data inspector |
-| 小程序端 - 预览界面 | `miniprogram-preview.svg` | WeChat mini-program preview with tab bar and product grid |
-| 小程序端 - 操作界面 | `miniprogram-operation.svg` | Product detail page with interactions and purchase actions |
+| Page | HTML Source | Screenshot | Description |
+|------|-----------|------------|-------------|
+| 管理平台 - 设计界面 | `platform/management-design.html` | `docs/screenshots/management-design.png` | Full designer UI with component palette, drag canvas, property panel, data source config |
+| 管理平台 - 预览界面 | `platform/management-preview.html` | `docs/screenshots/management-preview.png` | Live preview with phone mockup, mock data editor, binding inspector |
+| 小程序端 - 预览界面 | `platform/miniprogram-preview.html` | `docs/screenshots/miniprogram-preview.png` | WeChat mini-program home page with banner, search, categories, product grid, tab bar |
+| 小程序端 - 操作界面 | `platform/miniprogram-operation.html` | `docs/screenshots/miniprogram-operation.png` | Product detail with price, specs, reviews, add-to-cart/buy actions |
+
+#### 管理平台 - 设计界面
+![管理平台 - 设计界面](docs/screenshots/management-design.png)
+
+#### 管理平台 - 预览界面
+![管理平台 - 预览界面](docs/screenshots/management-preview.png)
+
+#### 小程序端 - 预览界面
+![小程序端 - 预览界面](docs/screenshots/miniprogram-preview.png)
+
+#### 小程序端 - 操作界面
+![小程序端 - 操作界面](docs/screenshots/miniprogram-operation.png)
+
+### SVG Diagrams (Programmatic)
+
+The `UITestDiagramGenerator` module also generates programmatic SVG diagrams from schema data. These are available in `docs/diagrams/` and can be regenerated from code.
 
 ## Development
 
 ```bash
 npm install
-npm run build     # Type check
-npm test          # Run tests (177 tests across 12 test files)
+npm run build         # Type check
+npm test              # Run tests (177 tests across 12 test files)
+npm run screenshots   # Capture runtime screenshots via Playwright
 ```
