@@ -15,7 +15,7 @@ import type {
 } from '../types';
 
 /** Regex to match binding expressions: {{expression}} */
-const BINDING_REGEX = /\{\{(.+?)\}\}/g;
+const BINDING_REGEX = /\{\{([^{}]+)\}\}/g;
 
 export class BindingEngine {
   private debug: boolean;
@@ -320,7 +320,7 @@ export class BindingEngine {
 
     // Comparison operators
     const comparisonMatch = unwrapped.match(
-      /^(.+?)\s*(===|!==|==|!=|>=|<=|>|<)\s*(.+)$/
+      /^(\S+)\s*(===|!==|==|!=|>=|<=|>|<)\s*(\S+)$/
     );
     if (comparisonMatch) {
       const left = this.resolveComparisonOperand(
