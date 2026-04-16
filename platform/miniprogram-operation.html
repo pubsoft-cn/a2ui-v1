@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>小程序端 - 操作界面</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #111; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.phone-outer { width: 399px; height: 862px; background: #111; border-radius: 44px; padding: 12px; box-shadow: 0 10px 60px rgba(0,0,0,.5); }
+.phone-inner { width: 100%; height: 100%; background: #fff; border-radius: 34px; overflow: hidden; display: flex; flex-direction: column; }
+
+/* Status bar */
+.status-bar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
+.status-bar .notch { width: 120px; height: 26px; background: #111; border-radius: 0 0 16px 16px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); }
+.status-bar .time { font-size: 14px; font-weight: 600; margin-top: 8px; }
+.status-bar .right-icons { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 12px; display: flex; gap: 4px; margin-top: 4px; }
+
+/* WeChat Nav */
+.wx-nav { height: 44px; background: #fff; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; border-bottom: 1px solid #f0f0f0; }
+.wx-nav .back { position: absolute; left: 12px; font-size: 20px; color: #333; cursor: pointer; }
+.wx-nav .title { font-size: 17px; font-weight: 600; }
+.wx-nav .capsule { position: absolute; right: 10px; display: flex; border: 1px solid #ddd; border-radius: 16px; overflow: hidden; }
+.wx-nav .capsule-btn { width: 32px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; background: rgba(255,255,255,.8); }
+.wx-nav .capsule-sep { width: 1px; height: 16px; background: #ddd; align-self: center; }
+
+/* Body */
+.wx-body { flex: 1; overflow-y: auto; background: #fff; }
+
+/* Hero image */
+.hero { width: 100%; height: 375px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); display: flex; align-items: center; justify-content: center; position: relative; }
+.hero-emoji { font-size: 80px; }
+.hero-dots { position: absolute; bottom: 12px; display: flex; gap: 6px; }
+.hero-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(0,0,0,.15); }
+.hero-dot.active { background: #6c63ff; width: 18px; border-radius: 4px; }
+.hero-share { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: rgba(0,0,0,.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+/* Price section */
+.price-section { padding: 14px 16px; }
+.price-row { display: flex; align-items: baseline; gap: 8px; }
+.price-main { font-size: 28px; font-weight: 800; color: #e53935; }
+.price-main .yen { font-size: 16px; }
+.price-original { font-size: 14px; color: #bbb; text-decoration: line-through; }
+.price-tag { display: inline-block; padding: 2px 8px; background: linear-gradient(90deg, #ff6b6b, #ee5a24); color: #fff; font-size: 10px; border-radius: 3px; font-weight: 700; margin-left: 8px; }
+.price-sold { font-size: 12px; color: #999; margin-left: auto; }
+
+/* Title */
+.product-title { padding: 8px 16px 4px; font-size: 16px; font-weight: 600; line-height: 1.5; }
+.product-subtitle { padding: 0 16px 12px; font-size: 12px; color: #999; display: flex; align-items: center; gap: 6px; }
+.badge-free { display: inline-block; padding: 1px 6px; background: #e8f5e9; color: #2e7d32; font-size: 10px; border-radius: 2px; }
+
+/* Spec rows */
+.spec-section { border-top: 8px solid #f5f5f5; }
+.spec-row { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+.spec-label { font-size: 13px; color: #999; width: 50px; flex-shrink: 0; }
+.spec-value { font-size: 13px; flex: 1; }
+.spec-arrow { color: #ccc; font-size: 16px; }
+
+/* Review section */
+.review-section { border-top: 8px solid #f5f5f5; padding: 14px 16px; }
+.review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.review-header .title { font-size: 14px; font-weight: 600; }
+.review-header .more { font-size: 12px; color: #999; }
+.review-card { background: #fafafa; border-radius: 8px; padding: 12px; }
+.review-user { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.review-avatar { width: 28px; height: 28px; border-radius: 50%; background: #6c63ff; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
+.review-name { font-size: 12px; font-weight: 500; }
+.review-stars { font-size: 12px; color: #ff9800; }
+.review-content { font-size: 13px; line-height: 1.6; color: #333; }
+.review-date { font-size: 11px; color: #999; margin-top: 6px; }
+
+/* Bottom action bar */
+.bottom-bar { height: 56px; background: #fff; border-top: 1px solid #eee; display: flex; align-items: center; padding: 0 12px; gap: 6px; flex-shrink: 0; }
+.bottom-icon { display: flex; flex-direction: column; align-items: center; width: 48px; font-size: 16px; position: relative; }
+.bottom-icon span { font-size: 9px; color: #999; margin-top: 1px; }
+.bottom-icon .badge { position: absolute; top: -2px; right: 6px; width: 14px; height: 14px; background: #e53935; color: #fff; font-size: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.btn-cart { flex: 1; height: 40px; background: linear-gradient(90deg, #ff9800, #ffb74d); color: #fff; border: none; border-radius: 20px 0 0 20px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.btn-buy { flex: 1; height: 40px; background: linear-gradient(90deg, #e53935, #ff5252); color: #fff; border: none; border-radius: 0 20px 20px 0; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* Touch indicator overlay */
+.touch-indicator { position: absolute; width: 40px; height: 40px; border: 2px solid rgba(108,99,255,.5); border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; pointer-events: none; }
+@keyframes pulse { 0%,100% { transform: scale(1); opacity: .7; } 50% { transform: scale(1.2); opacity: .3; } }
+
+/* Home indicator */
+.home-indicator { height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.home-indicator-bar { width: 100px; height: 4px; background: #111; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="phone-outer">
+  <div class="phone-inner">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="notch"></div>
+      <span class="time">9:41</span>
+      <span class="right-icons">
+        <span>📶</span><span>📡</span><span>🔋</span>
+      </span>
+    </div>
+
+    <!-- WeChat Nav -->
+    <div class="wx-nav">
+      <span class="back">‹</span>
+      <span class="title">商品详情</span>
+      <div class="capsule">
+        <div class="capsule-btn">•••</div>
+        <div class="capsule-sep"></div>
+        <div class="capsule-btn">✕</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="wx-body">
+      <!-- Hero Image -->
+      <div class="hero">
+        <span class="hero-emoji">🎧</span>
+        <div class="hero-share">📤</div>
+        <div class="hero-dots">
+          <div class="hero-dot active"></div>
+          <div class="hero-dot"></div>
+          <div class="hero-dot"></div>
+          <div class="hero-dot"></div>
+          <div class="hero-dot"></div>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="price-section">
+        <div class="price-row">
+          <span class="price-main"><span class="yen">¥</span>199</span>
+          <span class="price-original">¥399</span>
+          <span class="price-tag">限时5折</span>
+          <span class="price-sold">已售 2.3万</span>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div class="product-title">无线蓝牙耳机 Pro Max 高品质音效 主动降噪 超长续航30小时</div>
+      <div class="product-subtitle">
+        <span class="badge-free">包邮</span>
+        <span>7天无理由退换</span>
+        <span>·</span>
+        <span>运费险</span>
+      </div>
+
+      <!-- Specs -->
+      <div class="spec-section">
+        <div class="spec-row">
+          <span class="spec-label">选择</span>
+          <span class="spec-value">星空黑 · 旗舰版</span>
+          <span class="spec-arrow">›</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">配送</span>
+          <span class="spec-value">杭州市 · 预计明天16:00前到达</span>
+          <span class="spec-arrow">›</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">服务</span>
+          <span class="spec-value">品质保证 · 极速退款</span>
+          <span class="spec-arrow">›</span>
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="review-section">
+        <div class="review-header">
+          <span class="title">用户评价 (2680)</span>
+          <span class="more">查看全部 ›</span>
+        </div>
+        <div class="review-card">
+          <div class="review-user">
+            <div class="review-avatar">张</div>
+            <span class="review-name">张***明</span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-content">音质非常好，降噪效果明显，戴着很舒适，续航也给力，充一次电可以用两三天。</div>
+          <div class="review-date">2026-04-10 · 星空黑 · 旗舰版</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Action Bar -->
+    <div class="bottom-bar">
+      <div class="bottom-icon">❤️<span>收藏</span></div>
+      <div class="bottom-icon">
+        🛒
+        <span>购物车</span>
+        <div class="badge">3</div>
+      </div>
+      <div class="btn-cart">加入购物车</div>
+      <div class="btn-buy">立即购买</div>
+    </div>
+
+    <!-- Home indicator -->
+    <div class="home-indicator">
+      <div class="home-indicator-bar"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

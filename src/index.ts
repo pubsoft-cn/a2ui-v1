@@ -23,6 +23,46 @@ export type {
   ShellTiming,
 } from './core';
 
+// Management Platform
+export {
+  SchemaManager,
+  SchemaDesigner,
+  SchemaPreviewEngine,
+  BindingTester,
+  MockTestRunner,
+  OSSPublisher,
+  createInMemoryAdapter,
+  UITestDiagramGenerator,
+} from './management';
+
+export type {
+  SchemaStatus,
+  ManagedSchema,
+  SchemaVersionRecord,
+  SchemaTemplate,
+  NodeBuilderConfig,
+  DesignValidationResult,
+  DesignValidationError,
+  DesignValidationWarning,
+  PreviewConfig,
+  PreviewSnapshot,
+  BindingTestCase,
+  BindingTestResult,
+  UnresolvedBinding,
+  BindingAssertion,
+  MockDataSource,
+  MockTestScenario,
+  MockTestResult,
+  OSSConfig,
+  OSSUploadAdapter,
+  OSSUploadResult,
+  PublishOptions,
+  PublishResult,
+  DiagramType,
+  DiagramConfig,
+  DiagramResult,
+} from './management';
+
 // Types
 export type {
   ComponentType,
