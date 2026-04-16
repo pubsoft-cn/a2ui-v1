@@ -318,25 +318,41 @@ export class BindingEngine {
       return !this.evaluateExpression(unwrapped.slice(1), context);
     }
 
-    // Comparison operators
-    const comparisonMatch = unwrapped.match(
-      /^(\S+)\s*(===|!==|==|!=|>=|<=|>|<)\s*(\S+)$/
-    );
-    if (comparisonMatch) {
-      const left = this.resolveComparisonOperand(
-        comparisonMatch[1].trim(),
-        context
-      );
-      const right = this.resolveComparisonOperand(
-        comparisonMatch[3].trim(),
-        context
-      );
-      return this.compareValues(left, right, comparisonMatch[2]);
+    // Comparison operators - use manual parsing to avoid ReDoS
+    const comparison = this.parseComparison(unwrapped);
+    if (comparison) {
+      const left = this.resolveComparisonOperand(comparison.left, context);
+      const right = this.resolveComparisonOperand(comparison.right, context);
+      return this.compareValues(left, right, comparison.operator);
     }
 
     // Simple truthy check
     const value = this.resolveBindingPath(unwrapped, context);
     return !!value;
+  }
+
+  /**
+   * Parse a comparison expression without regex to avoid ReDoS.
+   * Returns the left operand, operator, and right operand, or null if not a comparison.
+   */
+  private parseComparison(
+    expr: string
+  ): { left: string; operator: string; right: string } | null {
+    // Ordered longest-first so === is checked before ==
+    const operators = ['===', '!==', '==', '!=', '>=', '<=', '>', '<'];
+
+    for (const op of operators) {
+      const idx = expr.indexOf(op);
+      if (idx > 0) {
+        const left = expr.slice(0, idx).trim();
+        const right = expr.slice(idx + op.length).trim();
+        if (left && right) {
+          return { left, operator: op, right };
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
