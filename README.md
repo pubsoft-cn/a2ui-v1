@@ -118,10 +118,125 @@ console.log(result.timing);   // Performance metrics
 - **Lifecycle hooks**: `onSchemaLoaded`, `onDataLoaded`, `onRenderComplete`, `onError`
 - **Custom components**: Extensible component registry with validation and prop transforms
 
+## Schema Management Platform
+
+The management platform provides a complete lifecycle for SchemaDocuments — from design and testing to publishing.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              Schema Management Platform                      │
+│                                                              │
+│  ┌──────────────┐  ┌───────────────┐  ┌──────────────────┐  │
+│  │SchemaManager │  │SchemaDesigner │  │ PreviewEngine    │  │
+│  │ CRUD + Status│  │ Templates     │  │ Desktop/Mobile/  │  │
+│  │ Versioning   │  │ Node Builder  │  │ MiniProgram      │  │
+│  └──────────────┘  │ Validation    │  └──────────────────┘  │
+│                    └───────────────┘                         │
+│  ┌──────────────┐  ┌───────────────┐  ┌──────────────────┐  │
+│  │BindingTester │  │MockTestRunner │  │  OSSPublisher    │  │
+│  │ Expression   │  │ Scenario-based│  │ Aliyun/Tencent/  │  │
+│  │ Validation   │  │ Full pipeline │  │ AWS/Custom       │  │
+│  └──────────────┘  └───────────────┘  └──────────────────┘  │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │         UITestDiagramGenerator (SVG)                  │   │
+│  │  管理平台设计 | 管理平台预览 | 小程序预览 | 小程序操作   │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Modules
+
+| Module | Role |
+|--------|------|
+| **SchemaManager** | CRUD operations, lifecycle status management (draft→testing→preview→published→archived), version tracking |
+| **SchemaDesigner** | Template-based schema creation, node builder, tree manipulation, design-time validation |
+| **SchemaPreviewEngine** | Preview schemas with mock/real data, desktop/mobile/miniprogram viewports, SVG snapshot generation |
+| **BindingTester** | Test binding expressions, detect unresolved bindings, run assertions against expected results |
+| **MockTestRunner** | Full-pipeline mock testing with scenarios, validate node counts and component types |
+| **OSSPublisher** | Publish schemas to OSS (Aliyun/Tencent/AWS/custom), version management, CDN URL generation |
+| **UITestDiagramGenerator** | Generate SVG test UI diagrams for management platform and mini-program interfaces |
+
+### Usage
+
+```typescript
+import {
+  SchemaManager,
+  SchemaDesigner,
+  BindingTester,
+  MockTestRunner,
+  OSSPublisher,
+  UITestDiagramGenerator,
+  SchemaPreviewEngine,
+} from './src';
+
+// 1. Design a schema
+const designer = new SchemaDesigner();
+const schema = designer.createFromTemplate('list-page')!;
+
+// 2. Manage lifecycle
+const manager = new SchemaManager();
+manager.create('home-page', 'Home Page', schema, { author: 'dev', tags: ['page'] });
+manager.setStatus('home-page', 'testing');
+
+// 3. Test bindings
+const tester = new BindingTester();
+const bindingResult = tester.runTest(schema, {
+  name: 'Binding validation',
+  inputData: { items: [{ title: 'Item 1', description: 'Desc' }] },
+});
+console.log(bindingResult.passed); // true
+
+// 4. Mock test
+const mockRunner = new MockTestRunner();
+const mockResult = mockRunner.runScenario(schema, {
+  name: 'Happy path',
+  mockDataSources: [{ key: 'items', data: [{ title: 'A', description: 'B' }] }],
+});
+console.log(mockResult.passed); // true
+
+// 5. Preview
+const preview = new SchemaPreviewEngine();
+const snapshot = preview.preview(schema, { items: [{ title: 'A', description: 'B' }] });
+console.log(snapshot.diagram); // SVG string
+
+// 6. Publish to OSS
+const publisher = new OSSPublisher({
+  provider: 'aliyun',
+  bucket: 'my-schemas',
+  region: 'cn-hangzhou',
+  basePath: '/a2ui',
+  cdnBaseUrl: 'https://cdn.example.com/a2ui',
+});
+const publishResult = await publisher.publish('home-page', schema);
+console.log(publishResult.url); // CDN URL
+
+// 7. Generate test UI diagrams
+const diagramGen = new UITestDiagramGenerator();
+const diagrams = diagramGen.generateAll(schema);
+// diagrams[0] => management-design (管理平台设计)
+// diagrams[1] => management-preview (管理平台预览)
+// diagrams[2] => miniprogram-preview (小程序预览)
+// diagrams[3] => miniprogram-operation (小程序操作)
+```
+
+### Test UI Diagrams
+
+Generated SVG diagrams are available in `docs/diagrams/`:
+
+| Diagram | File | Description |
+|---------|------|-------------|
+| 管理平台 - 设计界面 | `management-design.svg` | Schema designer with component palette, canvas, and property panel |
+| 管理平台 - 预览界面 | `management-preview.svg` | Preview with mobile device mockup and data inspector |
+| 小程序端 - 预览界面 | `miniprogram-preview.svg` | WeChat mini-program preview with tab bar and product grid |
+| 小程序端 - 操作界面 | `miniprogram-operation.svg` | Product detail page with interactions and purchase actions |
+
 ## Development
 
 ```bash
 npm install
 npm run build     # Type check
-npm test          # Run tests
+npm test          # Run tests (177 tests across 12 test files)
 ```
