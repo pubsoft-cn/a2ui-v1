@@ -9,12 +9,6 @@
  * Designed for high-performance RPC parameter assembly.
  */
 
-/**
- * Regex to match ${...} template expressions.
- * Uses negated character class to prevent ReDoS.
- */
-const TEMPLATE_REGEX = /\$\{([^}]+)\}/g;
-
 /** Context object passed to buildParams */
 export interface BuildParamsContext {
   /** Form data (user input values) */
@@ -85,11 +79,41 @@ export class BuildParams {
       return BuildParams.resolvePath(expr, context);
     }
 
-    // Mixed content: interpolate all templates as strings
-    return value.replace(TEMPLATE_REGEX, (_, expr: string) => {
-      const resolved = BuildParams.resolvePath(expr.trim(), context);
-      return resolved === undefined || resolved === null ? '' : String(resolved);
-    });
+    // Mixed content: manually parse and interpolate all ${...} templates
+    return BuildParams.interpolateTemplates(value, context);
+  }
+
+  /**
+   * Manually parse and interpolate ${...} template expressions
+   * without using regex to avoid ReDoS vulnerabilities.
+   */
+  private static interpolateTemplates(value: string, context: BuildParamsContext): string {
+    let result = '';
+    let i = 0;
+
+    while (i < value.length) {
+      // Look for '${'
+      if (value[i] === '$' && i + 1 < value.length && value[i + 1] === '{') {
+        // Find the closing '}'
+        const start = i + 2;
+        const end = value.indexOf('}', start);
+        if (end === -1) {
+          // No closing brace, treat rest as literal
+          result += value.slice(i);
+          break;
+        }
+
+        const expr = value.slice(start, end).trim();
+        const resolved = BuildParams.resolvePath(expr, context);
+        result += resolved === undefined || resolved === null ? '' : String(resolved);
+        i = end + 1;
+      } else {
+        result += value[i];
+        i++;
+      }
+    }
+
+    return result;
   }
 
   /**
