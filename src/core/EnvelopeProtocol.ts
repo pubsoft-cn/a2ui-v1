@@ -48,8 +48,19 @@ function canonicalize(data: unknown): string {
 
 /**
  * Simple hash function for environments without Web Crypto API.
- * Produces a hex string from the input using a fast non-cryptographic hash.
- * In production, replace with platform-specific crypto (e.g., wx.getRandomValues).
+ * Produces a hex string from the input using a fast non-cryptographic hash
+ * (based on MurmurHash3-like mixing).
+ *
+ * ⚠ SECURITY NOTE: This is NOT a cryptographic hash. It is used here as a
+ * portable fallback for mini-program environments (WeChat/Alipay) where
+ * Web Crypto API may be unavailable. For production deployments:
+ * - Use `wx.getRandomValues` + platform HMAC for WeChat Mini-programs
+ * - Use `my.rsa` / `my.createHmac` for Alipay Mini-programs
+ * - Use SubtleCrypto.sign() where Web Crypto API is available
+ *
+ * The sign types (SESSION/HMAC/MD5) describe the *protocol intent*;
+ * actual cryptographic strength depends on the hash implementation
+ * injected at the platform integration layer.
  */
 function simpleHash(input: string): string {
   let h1 = 0xdeadbeef;
