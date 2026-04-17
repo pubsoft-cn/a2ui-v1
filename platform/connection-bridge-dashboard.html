@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A2UI - 连接管理 · ConnectionBridge 面板</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans CJK SC', 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; }
+
+/* ─── Top Nav ─── */
+.top-nav { display: flex; align-items: center; height: 52px; background: #161b22; border-bottom: 1px solid #30363d; padding: 0 20px; }
+.top-nav .logo { font-size: 16px; font-weight: 700; color: #58a6ff; display: flex; align-items: center; gap: 8px; }
+.top-nav .nav-tabs { display: flex; margin-left: 32px; gap: 2px; }
+.top-nav .nav-tab { padding: 6px 14px; border-radius: 6px; font-size: 13px; color: #8b949e; cursor: pointer; transition: all .2s; }
+.top-nav .nav-tab.active { background: #21262d; color: #f0f6fc; }
+.top-nav .status-badge { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.badge-lan { background: #0d4429; color: #3fb950; border: 1px solid #238636; }
+.badge-cloud { background: #341a1a; color: #f85149; border: 1px solid #da3633; }
+.badge-sync { background: #1c2128; color: #8b949e; border: 1px solid #30363d; }
+
+/* ─── Dashboard Grid ─── */
+.dashboard { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto 1fr; gap: 16px; padding: 20px; height: calc(100vh - 52px - 32px); }
+
+/* ─── Stat Cards ─── */
+.stat-row { grid-column: 1 / -1; display: flex; gap: 16px; }
+.stat-card { flex: 1; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; }
+.stat-card .label { font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: .5px; }
+.stat-card .value { font-size: 28px; font-weight: 700; }
+.stat-card .value.green { color: #3fb950; }
+.stat-card .value.blue { color: #58a6ff; }
+.stat-card .value.orange { color: #d29922; }
+.stat-card .value.purple { color: #bc8cff; }
+.stat-card .sub { font-size: 11px; color: #8b949e; }
+
+/* ─── Panel ─── */
+.panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+.panel-header { padding: 12px 16px; border-bottom: 1px solid #30363d; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.panel-header .icon { font-size: 14px; }
+.panel-body { flex: 1; overflow-y: auto; padding: 12px; }
+
+/* ─── Route Topology ─── */
+.topology { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 20px; }
+.topo-node { width: 220px; padding: 14px; background: #21262d; border: 1px solid #30363d; border-radius: 10px; text-align: center; position: relative; }
+.topo-node.active { border-color: #3fb950; box-shadow: 0 0 12px rgba(63,185,80,.15); }
+.topo-node.inactive { opacity: .5; }
+.topo-node .node-icon { font-size: 24px; margin-bottom: 6px; }
+.topo-node .node-label { font-size: 13px; font-weight: 600; }
+.topo-node .node-detail { font-size: 11px; color: #8b949e; margin-top: 4px; }
+.topo-node .node-status { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 6px; font-size: 11px; }
+.topo-node .node-status .dot { width: 6px; height: 6px; border-radius: 50%; }
+.dot.green { background: #3fb950; }
+.dot.red { background: #f85149; }
+.dot.gray { background: #484f58; }
+.topo-arrow { font-size: 16px; color: #3fb950; }
+.topo-arrow.inactive { color: #484f58; }
+
+/* ─── Request Log ─── */
+.log-entry { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-bottom: 1px solid #21262d; font-size: 12px; }
+.log-entry:last-child { border-bottom: none; }
+.log-time { color: #484f58; font-family: 'SF Mono', monospace; font-size: 11px; white-space: nowrap; }
+.log-route { font-family: 'SF Mono', monospace; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; }
+.log-route.lan { background: #0d4429; color: #3fb950; }
+.log-route.cloud { background: #1c2128; color: #58a6ff; }
+.log-method { color: #d2a8ff; font-family: 'SF Mono', monospace; }
+.log-status { font-weight: 600; }
+.log-status.ok { color: #3fb950; }
+.log-status.err { color: #f85149; }
+.log-latency { color: #8b949e; margin-left: auto; white-space: nowrap; }
+
+/* ─── Envelope Inspector ─── */
+.envelope-block { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; line-height: 1.7; overflow-x: auto; margin-bottom: 10px; }
+.env-key { color: #ff7b72; }
+.env-str { color: #a5d6ff; }
+.env-num { color: #d2a8ff; }
+.env-label { font-size: 11px; color: #8b949e; margin-bottom: 4px; font-weight: 600; }
+
+/* ─── Privacy Status ─── */
+.privacy-panel { padding: 14px; }
+.privacy-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #21262d; }
+.privacy-row:last-child { border-bottom: none; }
+.privacy-label { font-size: 12px; display: flex; align-items: center; gap: 6px; }
+.privacy-value { font-size: 12px; font-weight: 600; }
+.privacy-value.enabled { color: #3fb950; }
+.privacy-value.disabled { color: #f85149; }
+.toggle { width: 36px; height: 20px; border-radius: 10px; position: relative; cursor: pointer; }
+.toggle.on { background: #238636; }
+.toggle.off { background: #484f58; }
+.toggle::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: #fff; top: 2px; transition: left .2s; }
+.toggle.on::after { left: 18px; }
+.toggle.off::after { left: 2px; }
+
+/* ─── Footer ─── */
+.footer { height: 32px; background: #161b22; border-top: 1px solid #30363d; display: flex; align-items: center; padding: 0 16px; font-size: 11px; color: #484f58; gap: 20px; }
+.footer .dot-indicator { display: flex; align-items: center; gap: 4px; }
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<div class="top-nav">
+  <div class="logo">⚡ A2UI ConnectionBridge</div>
+  <div class="nav-tabs">
+    <div class="nav-tab active">🌐 路由面板</div>
+    <div class="nav-tab">📡 信令日志</div>
+    <div class="nav-tab">🔒 隐私控制</div>
+    <div class="nav-tab">📊 性能监控</div>
+  </div>
+  <div class="status-badge">
+    <div class="badge badge-lan"><span class="dot green"></span> LAN 直连</div>
+    <div class="badge badge-sync">🔒 syncToCloud: OFF</div>
+  </div>
+</div>
+
+<div class="dashboard">
+  <!-- Stat Cards Row -->
+  <div class="stat-row">
+    <div class="stat-card">
+      <span class="label">当前路由</span>
+      <span class="value green">LAN</span>
+      <span class="sub">192.168.1.200:8443 · 延迟 3ms</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">RPC 请求总数</span>
+      <span class="value blue">1,247</span>
+      <span class="sub">今日 +156 · 成功率 99.8%</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">信封签名</span>
+      <span class="value orange">SESSION</span>
+      <span class="sub">已签名 1,247 个请求 · HMAC: 128 · MD5: 89</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">数据隐私</span>
+      <span class="value purple">本地</span>
+      <span class="sub">所有业务数据仅在 LAN 流转 · 0 笔发送至公网</span>
+    </div>
+  </div>
+
+  <!-- Left: Route Topology -->
+  <div class="panel">
+    <div class="panel-header"><span class="icon">🌐</span> 路由拓扑</div>
+    <div class="panel-body">
+      <div class="topology">
+        <div class="topo-node">
+          <div class="node-icon">📱</div>
+          <div class="node-label">小程序客户端</div>
+          <div class="node-detail">WeChat Skyline · A2UI Shell v1.0</div>
+        </div>
+        <div class="topo-arrow">▼ WSS/RPC</div>
+        <div class="topo-node active">
+          <div class="node-icon">🏠</div>
+          <div class="node-label">影子星 · 私有网关</div>
+          <div class="node-detail">192.168.1.200:8443 · mDNS 发现</div>
+          <div class="node-status"><span class="dot green"></span> 已连接 · 3ms</div>
+        </div>
+        <div class="topo-arrow inactive">▼ 仅在 syncToCloud=true 时启用</div>
+        <div class="topo-node inactive">
+          <div class="node-icon">☁️</div>
+          <div class="node-label">公网 WSS Relay</div>
+          <div class="node-detail">wss://relay.a2ui.example.com</div>
+          <div class="node-status"><span class="dot gray"></span> 备用 · 已禁用数据同步</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center: Request Log -->
+  <div class="panel">
+    <div class="panel-header"><span class="icon">📡</span> RPC 请求日志</div>
+    <div class="panel-body">
+      <div class="log-entry">
+        <span class="log-time">09:33:01.234</span>
+        <span class="log-route lan">LAN</span>
+        <span class="log-method">/api/chat/messages</span>
+        <span class="log-status ok">200</span>
+        <span class="log-latency">3ms</span>
+      </div>
+      <div class="log-entry">
+        <span class="log-time">09:32:58.891</span>
+        <span class="log-route lan">LAN</span>
+        <span class="log-method">/api/order/confirmReceipt</span>
+        <span class="log-status ok">200</span>
+        <span class="log-latency">5ms</span>
+      </div>
+      <div class="log-entry">
+        <span class="log-time">09:32:45.120</span>
+        <span class="log-route lan">LAN</span>
+        <span class="log-method">/api/product/detail</span>
+        <span class="log-status ok">200</span>
+        <span class="log-latency">2ms</span>
+      </div>
+      <div class="log-entry">
+        <span class="log-time">09:32:30.456</span>
+        <span class="log-route lan">LAN</span>
+        <span class="log-method">/api/user/profile</span>
+        <span class="log-status ok">200</span>
+        <span class="log-latency">4ms</span>
+      </div>
+      <div class="log-entry">
+        <span class="log-time">09:32:15.789</span>
+        <span class="log-route lan">LAN</span>
+        <span class="log-method">/api/chat/send</span>
+        <span class="log-status ok">200</span>
+        <span class="log-latency">6ms</span>
+      </div>
+      <div class="log-entry">
+        <span class="log-time">09:31:50.000</span>
+        <span class="log-route lan">LAN</span>
+        <span class="log-method">/api/schema/im-chat</span>
+        <span class="log-status ok">200</span>
+        <span class="log-latency">1ms</span>
+      </div>
+      <div class="log-entry" style="opacity:.5;">
+        <span class="log-time">09:30:01.100</span>
+        <span class="log-route cloud">CLOUD</span>
+        <span class="log-method">/api/schema/im-chat</span>
+        <span class="log-status ok">200</span>
+        <span class="log-latency">120ms</span>
+      </div>
+      <div class="log-entry" style="opacity:.5;">
+        <span class="log-time">09:30:00.000</span>
+        <span class="log-route cloud">CLOUD</span>
+        <span class="log-method">/probe/health</span>
+        <span class="log-status err">TIMEOUT</span>
+        <span class="log-latency">3000ms</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Envelope Inspector + Privacy -->
+  <div class="panel">
+    <div class="panel-header"><span class="icon">🔏</span> 信封协议 · 签名检查</div>
+    <div class="panel-body">
+      <div class="env-label">最近一次 RPC 信封 (HMAC)</div>
+      <div class="envelope-block">
+<span class="env-key">"msgId"</span>: <span class="env-str">"m3qk9d-a8f2x1"</span>
+<span class="env-key">"timestamp"</span>: <span class="env-num">1713168781234</span>
+<span class="env-key">"signType"</span>: <span class="env-str">"HMAC"</span>
+<span class="env-key">"sign"</span>: <span class="env-str">"a3f8c1d2e9b04f76"</span>
+<span class="env-key">"body"</span>: {
+  <span class="env-key">"method"</span>: <span class="env-str">"/api/chat/messages"</span>,
+  <span class="env-key">"params"</span>: {
+    <span class="env-key">"roomId"</span>: <span class="env-str">"support-1"</span>
+  }
+}
+      </div>
+
+      <div class="env-label">签名验证</div>
+      <div style="display:flex;align-items:center;gap:6px;padding:8px 0;margin-bottom:12px;">
+        <span class="dot green" style="width:8px;height:8px;"></span>
+        <span style="font-size:12px;color:#3fb950;font-weight:600;">✓ 签名验证通过</span>
+        <span style="font-size:11px;color:#8b949e;margin-left:auto;">canonicalize → HMAC-SHA256</span>
+      </div>
+
+      <div style="border-top:1px solid #30363d;padding-top:12px;">
+        <div class="env-label">🔒 隐私约束状态</div>
+        <div class="privacy-panel">
+          <div class="privacy-row">
+            <span class="privacy-label">🌐 syncToCloud</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="privacy-value disabled">OFF</span>
+              <div class="toggle off"></div>
+            </div>
+          </div>
+          <div class="privacy-row">
+            <span class="privacy-label">🏠 当前路由</span>
+            <span class="privacy-value enabled">LAN (安全)</span>
+          </div>
+          <div class="privacy-row">
+            <span class="privacy-label">📤 可发送业务数据</span>
+            <span class="privacy-value enabled">是 (LAN 通道)</span>
+          </div>
+          <div class="privacy-row">
+            <span class="privacy-label">☁️ 公网数据发送</span>
+            <span class="privacy-value disabled">已阻断</span>
+          </div>
+          <div class="privacy-row">
+            <span class="privacy-label">💾 数据存储</span>
+            <span style="font-size:12px;color:#8b949e;">memory + localStorage 仅本地</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <span class="dot-indicator"><span class="dot green"></span> LAN 已连接</span>
+  <span>探测间隔: 30s</span>
+  <span>签名类型: SESSION (默认) | HMAC (高安全) | MD5 (兼容)</span>
+  <span>信封协议: v1.0</span>
+  <span style="margin-left:auto;">A2UI ConnectionBridge Dashboard v1.0</span>
+</div>
+
+</body>
+</html>

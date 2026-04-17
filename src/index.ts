@@ -11,6 +11,11 @@ export {
   DataFetcher,
   BindingEngine,
   Renderer,
+  ConnectionBridge,
+  EnvelopeProtocol,
+  BuildParams,
+  ActionEngine,
+  ListContainer,
 } from './core';
 
 export type {
@@ -21,6 +26,15 @@ export type {
   EventHandler,
   ShellRenderResult,
   ShellTiming,
+  LanProbeAdapter,
+  RouteChangeListener,
+  EnvelopeOptions,
+  BuildParamsContext,
+  NavigationAdapter,
+  ActionRpcAdapter,
+  DataStoreAdapter,
+  ActionResult,
+  ListDataSource,
 } from './core';
 
 // Management Platform
@@ -82,4 +96,18 @@ export type {
   ShellLifecycleHooks,
   ShellError,
   RenderNode,
+  SignType,
+  Envelope,
+  ConnectionRoute,
+  ConnectionBridgeConfig,
+  LanProbeResult,
+  RpcRequest,
+  RpcResponse,
+  ActionType,
+  ActionDescriptor,
+  MessageCardType,
+  MessageCard,
+  MessageCardAction,
+  ListContainerOutput,
+  RenderedCard,
 } from './types';
