@@ -196,3 +196,163 @@ export interface RenderNode {
   children?: RenderNode[];
   events?: EventBinding[];
 }
+
+// ─── ConnectionBridge Types ────────────────────────────────────
+
+/** Sign type for the envelope protocol */
+export type SignType = 'SESSION' | 'HMAC' | 'MD5';
+
+/** Envelope protocol message wrapper */
+export interface Envelope<T = unknown> {
+  /** Unique message ID */
+  msgId: string;
+  /** Timestamp (ms) */
+  timestamp: number;
+  /** Signature type */
+  signType: SignType;
+  /** Computed signature */
+  sign: string;
+  /** Business payload */
+  body: T;
+}
+
+/** Connection route - which channel is active */
+export type ConnectionRoute = 'lan' | 'cloud';
+
+/** Configuration for ConnectionBridge */
+export interface ConnectionBridgeConfig {
+  /** Public WSS relay URL */
+  publicWssUrl: string;
+  /** Public REST API base URL */
+  publicApiBase: string;
+  /** LAN gateway probe timeout in ms */
+  lanProbeTimeout?: number;
+  /** LAN gateway IP/host (discovered or pre-configured) */
+  lanGatewayHost?: string;
+  /** LAN gateway port */
+  lanGatewayPort?: number;
+  /** Whether data can be synced to public cloud */
+  syncToCloud: boolean;
+  /** Session token for SESSION sign type */
+  sessionToken?: string;
+  /** HMAC secret key */
+  hmacSecret?: string;
+  /** Default sign type */
+  defaultSignType?: SignType;
+  /** Enable debug logging */
+  debug?: boolean;
+}
+
+/** LAN gateway probe result */
+export interface LanProbeResult {
+  /** Whether the LAN gateway is reachable */
+  reachable: boolean;
+  /** Discovered host address */
+  host?: string;
+  /** Discovered port */
+  port?: number;
+  /** Probe latency in ms */
+  latency?: number;
+}
+
+/** RPC request for ConnectionBridge */
+export interface RpcRequest {
+  /** API method/path */
+  method: string;
+  /** Request parameters */
+  params?: Record<string, unknown>;
+  /** Override sign type for this request */
+  signType?: SignType;
+  /** Whether this is a data-bearing request (subject to privacy constraint) */
+  isDataRequest?: boolean;
+}
+
+/** RPC response from ConnectionBridge */
+export interface RpcResponse<T = unknown> {
+  /** Business status code */
+  code: number;
+  /** Response message */
+  message: string;
+  /** Response data */
+  data: T;
+  /** Which route was used */
+  route: ConnectionRoute;
+}
+
+// ─── ActionEngine Types ────────────────────────────────────────
+
+/** Action types supported by the ActionEngine */
+export type ActionType = 'updateData' | 'Maps' | 'rpcCall';
+
+/** Action descriptor from schema */
+export interface ActionDescriptor {
+  /** Action type */
+  type: ActionType;
+  /** Target field path (for updateData) */
+  target?: string;
+  /** Value or expression (for updateData) */
+  value?: unknown;
+  /** Navigation URL (for Maps) */
+  url?: string;
+  /** RPC method name (for rpcCall) */
+  method?: string;
+  /** Parameters template with ${formData.xxx} / ${context.row.xxx} syntax */
+  body?: Record<string, unknown>;
+  /** Callback action to run after rpcCall completes */
+  onSuccess?: ActionDescriptor;
+}
+
+// ─── ListContainer Types ───────────────────────────────────────
+
+/** Message card type for IM-style list */
+export type MessageCardType = 'text' | 'image' | 'action' | 'system' | 'custom';
+
+/** IM-style message card schema */
+export interface MessageCard {
+  /** Unique card ID */
+  id: string;
+  /** Card type */
+  cardType: MessageCardType;
+  /** Sender info */
+  sender?: {
+    name: string;
+    avatar?: string;
+  };
+  /** Timestamp */
+  timestamp?: number;
+  /** Card body content */
+  content: Record<string, unknown>;
+  /** Actions attached to this card */
+  actions?: MessageCardAction[];
+}
+
+/** Action button on a message card */
+export interface MessageCardAction {
+  /** Button label */
+  label: string;
+  /** Action to trigger */
+  action: ActionDescriptor;
+}
+
+/** ListContainer render output */
+export interface ListContainerOutput {
+  /** Container ID */
+  id: string;
+  /** Rendered cards */
+  cards: RenderedCard[];
+}
+
+/** A rendered card for the view layer */
+export interface RenderedCard {
+  /** Card ID */
+  id: string;
+  /** Card type */
+  cardType: MessageCardType;
+  /** Resolved props for rendering */
+  props: Record<string, unknown>;
+  /** Resolved action buttons */
+  actions?: Array<{
+    label: string;
+    handler: () => void;
+  }>;
+}
