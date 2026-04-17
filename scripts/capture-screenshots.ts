@@ -54,6 +54,20 @@ const PAGES: ScreenshotConfig[] = [
     height: 900,
     description: '小程序端 - 操作界面',
   },
+  {
+    file: 'miniprogram-im-chat.html',
+    output: 'miniprogram-im-chat.png',
+    width: 430,
+    height: 900,
+    description: '小程序端 - IM 智能客服',
+  },
+  {
+    file: 'connection-bridge-dashboard.html',
+    output: 'connection-bridge-dashboard.png',
+    width: 1440,
+    height: 900,
+    description: 'ConnectionBridge - 连接管理面板',
+  },
 ];
 
 async function captureScreenshots(): Promise<void> {
